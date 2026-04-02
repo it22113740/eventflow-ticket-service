@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  ticket-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eventflow-ticket-service
+    restart: unless-stopped
+    ports:
+      - "5003:5003"
+    environment:
+      - NODE_ENV=production
+      - PORT=5003
+      - SERVICE_NAME=eventflow-ticket-service
+      - MONGO_URI=mongodb://mongo:27017/ticketdb
+      - JWT_SECRET=${JWT_SECRET}
+      - EVENT_SERVICE_URL=http://event-service:5002
+      - NOTIFICATION_SERVICE_URL=http://notification-service:5004
+      - LOG_LEVEL=info
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - eventflow-net
+
+  mongo:
+    image: mongo:7-jammy
+    container_name: eventflow-ticket-mongo
+    restart: unless-stopped
+    ports:
+      - "27020:27017"
+    volumes:
+      - ticket-mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - eventflow-net
+
+volumes:
+  ticket-mongo-data:
+
+networks:
+  eventflow-net:
+    external: true
+    name: eventflow-net
