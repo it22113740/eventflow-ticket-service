@@ -11,8 +11,23 @@ const {
   getBookingById,
   cancelBooking,
 } = require("../controllers/booking.controller");
+const { batchAvailability } = require("../controllers/availability.controller");
 
 const router = express.Router();
+
+/**
+ * Public: remaining seats per event (capacity passed from event service data).
+ */
+router.post(
+  "/api/public/availability/batch",
+  [
+    body("items").isArray({ min: 1 }).withMessage("items must be a non-empty array"),
+    body("items.*.eventId").notEmpty().withMessage("eventId is required"),
+    body("items.*.capacity").isInt({ min: 0 }).withMessage("capacity must be a non-negative integer"),
+  ],
+  validate,
+  batchAvailability
+);
 
 /**
  * @openapi
