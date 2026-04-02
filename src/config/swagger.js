@@ -13,6 +13,10 @@ const options = {
         url: `http://localhost:${process.env.PORT || 5003}`,
         description: "Local development",
       },
+      {
+        url: `https://eventflow-ticket-service-latest.onrender.com`,
+        description: "Production",
+      }
     ],
     components: {
       securitySchemes: {
